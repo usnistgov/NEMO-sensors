@@ -3,13 +3,13 @@
 {% load custom_tags_and_filters %}
 {% block extrahead %}
     {# Chart.js #}
-    <script type="text/javascript" src="{% static "sensors/chart.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "sensors/chartjs-adapter-moment.js" %}"></script>
+    <script type="text/javascript" src="{% static "NEMO_sensors/chart.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "NEMO_sensors/chartjs-adapter-moment.js" %}"></script>
     {# Daterange picker #}
-    <script type="text/javascript" src="{% static "sensors/daterangepicker.js" %}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static "sensors/daterangepicker.css" %}" />
+    <script type="text/javascript" src="{% static "NEMO_sensors/daterangepicker.js" %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static "NEMO_sensors/daterangepicker.css" %}" />
     {# Sensors #}
-    <link rel="stylesheet" type="text/css" href="{% static "sensors/sensors.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "NEMO_sensors/sensors.css" %}" />
 {% endblock %}
 {% block title %}{{ sensor.name }} data{% endblock %}
 {% block content %}

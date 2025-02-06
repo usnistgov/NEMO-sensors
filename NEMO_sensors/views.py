@@ -37,7 +37,7 @@ def sensors(request, category_id=None):
         "sensors": sensor_list,
         "alert_logs": alert_logs,
     }
-    return render(request, "sensors/sensors.html", dictionary)
+    return render(request, "NEMO_sensors/sensors.html", dictionary)
 
 
 @login_required
@@ -61,7 +61,7 @@ def sensor_details(request, sensor_id, tab: str = None):
             if variable.startswith("sensor_format_")
         },
     }
-    return render(request, "sensors/sensor_data.html", dictionary)
+    return render(request, "NEMO_sensors/sensor_data.html", dictionary)
 
 
 @staff_member_required
@@ -109,7 +109,7 @@ def sensor_alert_log(request, sensor_id):
     sensor = get_object_or_404(Sensor, pk=sensor_id)
     sensor_data, start, end = get_sensor_data(request, sensor)
     alert_log_entries = SensorAlertLog.objects.filter(sensor=sensor, time__gte=start, time__lte=end or timezone.now())
-    return render(request, "sensors/sensor_alerts.html", {"alerts": alert_log_entries})
+    return render(request, "NEMO_sensors/sensor_alerts.html", {"alerts": alert_log_entries})
 
 
 def get_sensor_data(request, sensor) -> (QuerySetType[SensorData], datetime, datetime):

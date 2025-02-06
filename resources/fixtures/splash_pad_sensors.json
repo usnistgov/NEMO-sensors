@@ -312,5 +312,12 @@
       "triggered_on": "2022-06-13T17:52:05.965Z",
       "additional_emails": ""
     }
+  },
+  {
+    "model": "NEMO.customization",
+    "pk": "sensor_default_daterange",
+    "fields": {
+      "value": "last_year"
+    }
   }
 ]
