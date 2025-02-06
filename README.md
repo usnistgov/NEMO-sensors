@@ -5,7 +5,7 @@
 [![PyPI](https://img.shields.io/pypi/v/nemo-sensors?label=pypi%20version)](https://pypi.org/project/NEMO-sensors/)
 [![Changelog](https://img.shields.io/github/v/release/usnistgov/NEMO-sensors?include_prereleases&label=changelog)](https://github.com/usnistgov/NEMO-sensors/releases)
 
-Plugin for NEMO allowing creation, rendering and approval of custom forms for users/staff
+Plugin for NEMO allowing to connect to sensors to collect data and set alerts.
 
 ## Installation
 

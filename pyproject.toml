@@ -32,8 +32,8 @@ Changelog = "https://github.com/usnistgov/NEMO-sensors/releases"
 Issues = "https://github.com/usnistgov/NEMO-sensors/issues"
 
 [project.optional-dependencies]
-NEMO-CE = ["NEMO-CE>=6.0.0",]
-NEMO = ["NEMO>=6.0.0",]
+NEMO-CE = ["NEMO-CE>=6.1.0",]
+NEMO = ["NEMO>=6.1.0",]
 dev-tools = ["pre-commit", "djlint", "black"]
 
 [tool.setuptools.packages.find]
