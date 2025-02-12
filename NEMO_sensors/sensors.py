@@ -8,9 +8,9 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from pymodbus.bit_read_message import ReadCoilsRequest, ReadCoilsResponse
+from pymodbus.pdu.bit_message import ReadCoilsRequest, ReadCoilsResponse
 from pymodbus.client import ModbusTcpClient
-from pymodbus.pdu import ModbusRequest, ModbusResponse
+from pymodbus.pdu import ModbusPDU
 
 from NEMO_sensors.admin import SensorAdminForm, SensorCardAdminForm
 from NEMO_sensors.customizations import SensorCustomization
@@ -133,10 +133,10 @@ def mocked_modbus_client(*args, **kwargs):
         def connect(self):
             return True
 
-        def execute(self, request: ModbusRequest = None) -> ModbusResponse:
+        def execute(self, no_response_expected: bool, request: ModbusPDU = None) -> ModbusPDU:
             if isinstance(request, ReadCoilsRequest):
-                return ReadCoilsResponse(values=[random.randint(0, 1)])
-            return ModbusResponse()
+                return ReadCoilsResponse(bits=[random.choice([True, False])])
+            return ModbusPDU()
 
     return MockModbusClient(*args, **kwargs)
 
@@ -183,7 +183,7 @@ class ModbusTcpSensor(Sensor):
                     f"Connection to server {sensor.card.server}:{sensor.card.port} could not be established"
                 )
             kwargs = {"slave": sensor.unit_id} if sensor.unit_id is not None else {}
-            read_response = client.read_holding_registers(sensor.read_address, sensor.number_of_values, **kwargs)
+            read_response = client.read_holding_registers(sensor.read_address, count=sensor.number_of_values, **kwargs)
             if read_response.isError():
                 raise Exception(f"Error with sensor {sensor.name}: {str(read_response)}")
             return read_response.registers

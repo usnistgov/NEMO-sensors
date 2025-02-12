@@ -32,7 +32,7 @@ modbus_client_functions = ["read_coils"]
 def get_modbus_function(name):
     # This will return the corresponding modbus function
     def modbus_function(registers):
-        decoder = BinaryPayloadDecoder.fromRegisters(registers, byteorder=Endian.Big, wordorder=Endian.Little)
+        decoder = BinaryPayloadDecoder.fromRegisters(registers, byteorder=Endian.BIG, wordorder=Endian.LITTLE)
         return getattr(decoder, name)
 
     return modbus_function
