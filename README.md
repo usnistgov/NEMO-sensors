@@ -24,6 +24,14 @@ INSTALLED_APPS = [
 ]
 ```
 
+To enabled sensor data pulling, set a cron job running every minute with one of the following options:
+
+1. send an authenticated http request to `<nemo_url>/manage_sensor_data/`
+2. run command `django-admin manage_sensor_data` or `python manage.py manage_sensor_data`
+
+Example of `systemd` service and timer files are provided for your convenience in the [systemd folder](https://github.com/usnistgov/NEMO-sensors/tree/master/resources/systemd).
+
+
 ## Usage
 
 Usage instructions go here.
