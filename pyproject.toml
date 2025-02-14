@@ -1,6 +1,6 @@
 [project]
 name = "NEMO-sensors"
-version = "0.9.1"
+version = "0.9.2"
 description = "Plugin for NEMO providing support for connecting to Modbus sensors"
 keywords = ["NEMO"]
 readme = "README.md"
