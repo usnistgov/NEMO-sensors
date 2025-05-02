@@ -4,19 +4,18 @@ from logging import getLogger
 from typing import Dict, List
 from unittest import mock
 
+from NEMO.evaluators import evaluate_expression, get_expression_variables
 from django.core.exceptions import ValidationError
-from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from pymodbus.pdu.bit_message import ReadCoilsRequest, ReadCoilsResponse
 from pymodbus.client import ModbusTcpClient
 from pymodbus.pdu import ModbusPDU
+from pymodbus.pdu.bit_message import ReadCoilsRequest, ReadCoilsResponse
 
 from NEMO_sensors.admin import SensorAdminForm, SensorCardAdminForm
 from NEMO_sensors.customizations import SensorCustomization
 from NEMO_sensors.evaluators import evaluate_modbus_expression
 from NEMO_sensors.models import Sensor as Sensor_model, SensorAlert, SensorCardCategory, SensorData
-from NEMO.evaluators import evaluate_expression, get_expression_variables
 
 sensors_logger = getLogger(__name__)
 
@@ -80,17 +79,10 @@ class Sensor(ABC):
                         continue
             data_value = self.evaluate_sensor(sensor, registers=registers)
             if data_value is not None:
-                now = timezone.now()
-                # Saving the data point in both sensor data and sensor
-                with transaction.atomic():
-                    data = SensorData.objects.create(sensor=sensor, value=data_value, created_date=now)
-                    sensor.last_read = now
-                    sensor.last_value = data_value
-                    sensor.save(update_fields=["last_read", "last_value"])
-                process_alerts(sensor, data)
-                return data
+                return SensorData.objects.create(sensor=sensor, value=data_value, created_date=timezone.now())
         except Exception as error:
             sensors_logger.error(error)
+            # process now to trigger the no data
             process_alerts(sensor, data)
             if raise_exception:
                 raise

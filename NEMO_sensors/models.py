@@ -10,6 +10,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -204,6 +206,18 @@ class SensorData(BaseModel):
     class Meta:
         verbose_name_plural = "Sensor data"
         ordering = ["-created_date"]
+
+
+@receiver(post_save, sender=SensorData)
+def sensor_data_post_save(sender, instance: SensorData, created, **kwargs):
+    from NEMO_sensors.sensors import process_alerts
+
+    sensor = instance.sensor
+    if not sensor.last_read or instance.created_date > sensor.last_read:
+        sensor.last_read = instance.created_date
+        sensor.last_value = instance.value
+        sensor.save(update_fields=["last_read", "last_value"])
+        process_alerts(sensor, instance)
 
 
 class SensorAlertLog(BaseModel):
