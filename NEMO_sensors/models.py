@@ -104,7 +104,7 @@ class SensorCategory(BaseModel):
         return False
 
     def __str__(self):
-        return str(self.name)
+        return self.name if not self.parent else " | ".join([anc.name for anc in self.ancestors(include_self=True)])
 
     class Meta:
         verbose_name_plural = "Sensor categories"
