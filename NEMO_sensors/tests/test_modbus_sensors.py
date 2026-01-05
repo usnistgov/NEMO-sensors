@@ -2,7 +2,7 @@ from unittest import mock
 
 from django.test import TestCase
 
-from NEMO_sensors.evaluators import evaluate_modbus_expression, modbus_functions
+from NEMO_sensors.evaluators import evaluate_modbus_expression, modbus_functions_map
 from NEMO_sensors.models import Sensor, SensorCard, SensorCardCategory
 from NEMO_sensors.sensors import mocked_modbus_client
 
@@ -11,23 +11,22 @@ class ModbusInterlockTestCase(TestCase):
     def test_modbus_evaluation(self):
         # Test all modbus functions
         variables_1 = {"my_list": [100]}
-        variables_2 = {"my_list": [100, 500]}
-        variables_4 = {"my_list": [100, 500, 1000, 2000]}
+        variables_2 = {"my_list": [100, 105]}
+        variables_4 = {"my_list": [100, 105, 110, 120]}
         sensor = Sensor()
-        for function_name in modbus_functions:
+        for function_name in modbus_functions_map:
             sensor.formula = f"decode_string(my_list)"
             evaluate_modbus_expression(sensor, **variables_1)
-            if "8" in function_name:
-                sensor.formula = f"{function_name}(my_list)"
-                evaluate_modbus_expression(sensor, **variables_1)
             if "16" in function_name:
                 evaluate_modbus_expression(sensor, **variables_1)
             if "32" in function_name:
                 evaluate_modbus_expression(sensor, **variables_2)
+                sensor.formula = f"round(decode_32bit_float(my_list))"
+                evaluate_modbus_expression(sensor, **variables_2)
             elif "64" in function_name:
                 evaluate_modbus_expression(sensor, **variables_4)
-        sensor.formula = f"round(decode_8bit_int(my_list))"
-        evaluate_modbus_expression(sensor, **variables_1)
+                sensor.formula = f"round(decode_64bit_float(my_list))"
+                evaluate_modbus_expression(sensor, **variables_4)
 
     @mock.patch("NEMO_sensors.evaluators.ModbusTcpClient", side_effect=mocked_modbus_client)
     def test_read_coils_function(self, mock_args):

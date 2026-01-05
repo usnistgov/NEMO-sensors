@@ -1,41 +1,27 @@
 import ast
 from typing import List
 
+from NEMO.evaluators import BasicEvaluatorVisitor
 from pymodbus.client import ModbusTcpClient
-from pymodbus.constants import Endian
-from pymodbus.payload import BinaryPayloadDecoder
 
 from NEMO_sensors.models import Sensor
-from NEMO.evaluators import BasicEvaluatorVisitor
 
-# Special modbus functions
-modbus_functions = [
-    "decode_8bit_uint",
-    "decode_16bit_uint",
-    "decode_32bit_uint",
-    "decode_64bit_uint",
-    "decode_8bit_int",
-    "decode_16bit_int",
-    "decode_32bit_int",
-    "decode_64bit_int",
-    "decode_16bit_float",
-    "decode_32bit_float",
-    "decode_64bit_float",
-    "decode_bits",
-    "decode_string",
-]
+# Special modbus functions, for backwards compatibility
+modbus_functions_map = {
+    "decode_16bit_uint": ModbusTcpClient.DATATYPE.UINT16,
+    "decode_32bit_uint": ModbusTcpClient.DATATYPE.UINT32,
+    "decode_64bit_uint": ModbusTcpClient.DATATYPE.UINT64,
+    "decode_16bit_int": ModbusTcpClient.DATATYPE.INT16,
+    "decode_32bit_int": ModbusTcpClient.DATATYPE.INT32,
+    "decode_64bit_int": ModbusTcpClient.DATATYPE.INT64,
+    "decode_32bit_float": ModbusTcpClient.DATATYPE.FLOAT32,
+    "decode_64bit_float": ModbusTcpClient.DATATYPE.FLOAT64,
+    "decode_bits": ModbusTcpClient.DATATYPE.BITS,
+    "decode_string": ModbusTcpClient.DATATYPE.STRING,
+}
 
 # Special functions that are executed on the modbus client itself and require a complete connection
 modbus_client_functions = ["read_coils"]
-
-
-def get_modbus_function(name):
-    # This will return the corresponding modbus function
-    def modbus_function(registers):
-        decoder = BinaryPayloadDecoder.fromRegisters(registers, byteorder=Endian.BIG, wordorder=Endian.LITTLE)
-        return getattr(decoder, name)
-
-    return modbus_function
 
 
 def evaluate_modbus_client_function(sensor: Sensor, name: str, args: List):
@@ -65,12 +51,20 @@ class ModbusEvaluatorVisitor(BasicEvaluatorVisitor):
     def visit_Call(self, node: ast.Call):
         if node.func.id in self.functions:
             return super().visit_Call(node)
-        elif node.func.id in modbus_functions:
+        elif node.func.id in modbus_functions_map:
+            # for backwards compatibility
             function_args = [self.visit(arg) for arg in node.args]
-            return get_modbus_function(node.func.id)(*function_args)()
+            data_type = modbus_functions_map[node.func.id]
+            return ModbusTcpClient.convert_from_registers(function_args[0], data_type, word_order="little")
         elif node.func.id in modbus_client_functions:
             function_args = [self.visit(arg) for arg in node.args]
             return evaluate_modbus_client_function(self.sensor, node.func.id, function_args)
+        elif node.func.id == "convert_from_registers":
+            function_args = [self.visit(arg) for arg in node.args]
+            return ModbusTcpClient.convert_from_registers(*function_args)
+        elif node.func.id == "convert_to_registers":
+            function_args = [self.visit(arg) for arg in node.args]
+            return ModbusTcpClient.convert_to_registers(*function_args)
         else:
             self.generic_visit(node)
 
